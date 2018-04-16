@@ -18,6 +18,7 @@ package com.brett.beam;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.Intent;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -33,10 +34,17 @@ import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brett.beam.Adapters.MessageAdapter;
+import com.brett.beam.models.Messsage;
+
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Beam extends Activity implements CreateNdefMessageCallback,
@@ -44,23 +52,34 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
     NfcAdapter mNfcAdapter;
     TextView mInfoText;
     private static final int MESSAGE_SENT = 1;
+    ListView listView;
+    MessageAdapter adapter;
+    ArrayList<Messsage> listMessages;
+    EditText etMessage;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        etMessage=(EditText) findViewById(R.id.message);
 
-        mInfoText = (TextView) findViewById(R.id.textView);
-        // Check for available NFC Adapter
+       // Check for available NFC Adapter
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
-            mInfoText = (TextView) findViewById(R.id.textView);
-            mInfoText.setText("NFC is not available on this device.");
+          etMessage.setText("NFC is not available on this device.");
         }
         // Register callback to set NDEF message
         mNfcAdapter.setNdefPushMessageCallback(this, this);
         // Register callback to listen for message-sent success
         mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
+
+        listMessages = new ArrayList<>();
+        adapter = new MessageAdapter(this,listMessages);
+        listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
+
+
     }
 
 
@@ -71,14 +90,25 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
     public NdefMessage createNdefMessage(NfcEvent event) {
         Time time = new Time();
         time.setToNow();
-        String text = ("Beam me up!\n\n" +
+        String text = (etMessage.getText() + "_" +
                 "Beam Time: " + time.format("%H:%M:%S"));
+
+        listMessages.add(new Messsage("self", etMessage.getText().toString(), time.format("%H:%M:%S")));
+
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                adapter.notifyDataSetChanged();
+                etMessage.setText("");
+            }
+        });
         NdefMessage msg = new NdefMessage(
                 new NdefRecord[] { createMimeRecord(
                         "application/com.example.android.beam", text.getBytes())
          /**
           * The Android Application Record (AAR) is commented out. When a device
-          * receives a push with an AAR in it, the application specified in the AAR
+          * receives a push with an AAR in i
+          * t, the application specified in the AAR
           * is guaranteed to run. The AAR overrides the tag dispatch system.
           * You can add it back in to guarantee that this
           * activity starts when receiving a beamed message. For now, this code
@@ -135,7 +165,10 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
         // only one message sent during the beam
         NdefMessage msg = (NdefMessage) rawMsgs[0];
         // record 0 contains the MIME type, record 1 is the AAR, if present
-        mInfoText.setText(new String(msg.getRecords()[0].getPayload()));
+        String str=new String(msg.getRecords()[0].getPayload());
+        String[] strTab=str.split("_");
+        listMessages.add(new Messsage("Other",strTab[0],strTab[1]));
+        adapter.notifyDataSetChanged();
     }
 
     /**
