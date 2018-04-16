@@ -1,0 +1,21 @@
+#Internal package file, do not edit.
+#Fri Mar 16 11:19:56 EST 2018
+2.base=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_
+5.file=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_/AndroidManifest.xml
+5.set=ANDROID_RESOURCE
+3.base=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_
+2.set=ANDROID_RESOURCE
+4.base=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/transforms/dexMerger/debug/0
+count=6
+0.file=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_/resources.arsc
+5.base=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_
+4.set=DEX
+1.file=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_/res/menu/options.xml
+1.set=ANDROID_RESOURCE
+2.file=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_/res/layout-ldltr/main.xml
+0.base=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_
+3.file=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_/res/drawable-hdpi-v4/ic_launcher.png
+3.set=ANDROID_RESOURCE
+1.base=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/res/debug/resources-debug.ap_
+4.file=/Users/eamosse/Dropbox/development/_dev/perso/Martinique/Android-Beam-Demo/app/build/intermediates/transforms/dexMerger/debug/0/classes.dex
+0.set=ANDROID_RESOURCE
