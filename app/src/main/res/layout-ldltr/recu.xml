@@ -1,30 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="100dp"
+        android:layout_alignParentRight="true"
+        android:padding="15dp"
+        android:paddingLeft="250dp"
+        android:background="@drawable/recu"
+        >
 
     <TextView
         android:id="@+id/idExpediteur"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
-        android:layout_gravity="right"
-        android:textAlignment="textEnd"
-        tools:ignore="RtlCompat"/>
+        android:layout_marginLeft="35dp"
+        android:textStyle="bold"
+        android:textColor="#000"
+       />
 
     <TextView
         android:id="@+id/messageRecuLe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
-        android:layout_gravity="right"
-        android:textAlignment="textEnd"
-        tools:ignore="RtlCompat" />
+        android:textColor="#000"
+        android:layout_marginLeft="35dp"
+        android:textStyle="italic|bold"
+        android:layout_below="@+id/idExpediteur"/>
 
     <TextView
         android:id="@+id/leMessageRecu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView" />
-</LinearLayout>
+        android:textColor="#000"
+        android:text="TextView"
+        android:layout_marginLeft="35dp"
+        android:layout_below="@+id/messageRecuLe"/>
+    </RelativeLayout>
+</RelativeLayout>

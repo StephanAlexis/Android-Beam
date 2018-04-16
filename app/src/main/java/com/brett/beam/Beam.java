@@ -53,6 +53,7 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
     TextView mInfoText;
     private static final int MESSAGE_SENT = 1;
     ListView listView;
+    //adapter pour la listview
     MessageAdapter adapter;
     ArrayList<Messsage> listMessages;
     EditText etMessage;
