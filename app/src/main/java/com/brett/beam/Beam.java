@@ -19,6 +19,9 @@ package com.brett.beam;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -29,12 +32,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +47,8 @@ import android.widget.Toast;
 import com.brett.beam.Adapters.MessageAdapter;
 import com.brett.beam.models.Messsage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,11 +59,15 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
     NfcAdapter mNfcAdapter;
     TextView mInfoText;
     private static final int MESSAGE_SENT = 1;
+    private static final int PICK_IMAGE_REQUEST = 1;
     ListView listView;
     //adapter pour la listview
     MessageAdapter adapter;
     ArrayList<Messsage> listMessages;
     EditText etMessage;
+    boolean isImage=false;
+    Bitmap bitmap;
+    MenuItem miMenuPhoto;
 
 
     @Override
@@ -66,7 +77,7 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
         etMessage=(EditText) findViewById(R.id.message);
 
        // Check for available NFC Adapter
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+       mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
           etMessage.setText("NFC is not available on this device.");
         }
@@ -79,8 +90,9 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
         adapter = new MessageAdapter(this,listMessages);
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
-
-
+        listMessages.add(new Messsage("self","hello it's me", "une date"));
+        listMessages.add(new Messsage("others","hello it's you", "une date"));
+                adapter.notifyDataSetChanged();
     }
 
 
@@ -91,10 +103,32 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
     public NdefMessage createNdefMessage(NfcEvent event) {
         Time time = new Time();
         time.setToNow();
-        String text = (etMessage.getText() + "_" +
-                "Beam Time: " + time.format("%H:%M:%S"));
+        String text ;
+        NdefMessage msg;
+        if(isImage) {
+            text = ("une image" + "_" +
+                    "Beam Time: " + time.format("%H:%M:%S"));
+            listMessages.add(new Messsage("self", bitmap, time.format("%H:%M:%S")));
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100,baos);
+            byte[] b = baos.toByteArray();
+            msg = new NdefMessage(
+                    new NdefRecord[] {
+                            createMimeRecord("application/com.itransition.dolbik.android.beam", b),
+                            createMimeRecord("application/com.example.android.beam", text.getBytes())
 
-        listMessages.add(new Messsage("self", etMessage.getText().toString(), time.format("%H:%M:%S")));
+                    });
+        }
+        else {
+            text = (etMessage.getText() + "_" +
+                    "Beam Time: " + time.format("%H:%M:%S"));
+            listMessages.add(new Messsage("self", etMessage.getText().toString(), time.format("%H:%M:%S")));
+            msg = new NdefMessage(
+                    new NdefRecord[] { createMimeRecord(
+                            "application/com.example.android.beam", text.getBytes())
+
+                    });
+        }
 
         this.runOnUiThread(new Runnable() {
             @Override
@@ -103,20 +137,7 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
                 etMessage.setText("");
             }
         });
-        NdefMessage msg = new NdefMessage(
-                new NdefRecord[] { createMimeRecord(
-                        "application/com.example.android.beam", text.getBytes())
-         /**
-          * The Android Application Record (AAR) is commented out. When a device
-          * receives a push with an AAR in i
-          * t, the application specified in the AAR
-          * is guaranteed to run. The AAR overrides the tag dispatch system.
-          * You can add it back in to guarantee that this
-          * activity starts when receiving a beamed message. For now, this code
-          * uses the tag dispatch system.
-          */
-          //,NdefRecord.createApplicationRecord("com.example.android.beam")
-        });
+
         return msg;
     }
 
@@ -166,9 +187,21 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
         // only one message sent during the beam
         NdefMessage msg = (NdefMessage) rawMsgs[0];
         // record 0 contains the MIME type, record 1 is the AAR, if present
-        String str=new String(msg.getRecords()[0].getPayload());
-        String[] strTab=str.split("_");
-        listMessages.add(new Messsage("Other",strTab[0],strTab[1]));
+        if(msg.getRecords().length>1){
+            Bitmap bmp= BitmapFactory.decodeByteArray(msg.getRecords()[0].getPayload(), 0, msg.getRecords()[0].getPayload().length);
+            Bitmap bitmapModifiable = bmp.copy(Bitmap.Config.ARGB_8888, true);
+            String str=new String(msg.getRecords()[1].getPayload());
+            String[] strTab=str.split("_");
+            listMessages.add(new Messsage("Other",bitmapModifiable,strTab[1]));
+        }
+        else
+        {
+            String str=new String(msg.getRecords()[0].getPayload());
+            String[] strTab=str.split("_");
+            listMessages.add(new Messsage("Other",strTab[0],strTab[1]));
+        }
+
+
         adapter.notifyDataSetChanged();
     }
 
@@ -192,6 +225,8 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
         }
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options, menu);
+
+        miMenuPhoto = menu.findItem(R.id.menu_photo);
         return true;
     }
 
@@ -202,8 +237,52 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
                 Intent intent = new Intent(Settings.ACTION_NFCSHARING_SETTINGS);
                 startActivity(intent);
                 return true;
+            case R.id.menu_photo:
+                if(!isImage) {
+                    Intent iPhoto = new Intent();
+                    iPhoto.setType("image/*");
+                    iPhoto.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(iPhoto, "Choisir une image"), PICK_IMAGE_REQUEST);
+                }
+                else
+                {
+                    isImage=false;
+                    miMenuPhoto.setIcon(R.drawable.photo);
+                    etMessage.setText("");
+                    etMessage.setEnabled(true);
+
+                }
+
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+            Uri uri = data.getData();
+
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                isImage=true;
+                try {
+                    miMenuPhoto.setIcon(R.drawable.note);
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+                etMessage.setText("Image selectionnée");
+                etMessage.setEnabled(false);
+                //ImageView imageView = (ImageView) findViewById(R.id.imageView);
+                //imageView.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

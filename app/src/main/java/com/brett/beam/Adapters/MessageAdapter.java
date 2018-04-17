@@ -27,12 +27,21 @@ public class MessageAdapter extends ArrayAdapter<Messsage> {
         TextView tvExpediteur;
         TextView tvMessage;
         TextView tvDate;
+        ImageView ivPhoto;
     }
 
     public MessageAdapter(Context context, List<Messsage> messages) {
         super(context,  android.R.layout.simple_list_item_1, messages);
     }
 
+    private  ViewHolder remplirViewHolder(TextView tvExpediteur, TextView tvMessage, TextView tvDate)
+    {
+        ViewHolder vh=new ViewHolder();
+        vh.tvExpediteur=tvExpediteur;
+        vh.tvMessage=tvMessage;
+        vh.tvDate=tvDate;
+        return vh;
+    }
     @Override
     public View getView(int position, @Nullable View convertView, ViewGroup parent) {
 
@@ -42,18 +51,30 @@ public class MessageAdapter extends ArrayAdapter<Messsage> {
         if(convertView==null) {
             viewHolder=new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            if(message.getExpediteur().compareTo("self")==0) {
-                convertView = inflater.inflate(R.layout.envoye, parent, false);
-                viewHolder.tvExpediteur = (TextView) convertView.findViewById(R.id.idDestinataire);
-                viewHolder.tvMessage = (TextView) convertView.findViewById(R.id.leMessageEnvoye);
-                viewHolder.tvDate = (TextView) convertView.findViewById(R.id.messageEnvoyeLe);
+            if(!message.getIsImage()) {
+                if (message.getExpediteur().compareTo("self") == 0) {
+                    convertView = inflater.inflate(R.layout.envoye, parent, false);
+                    viewHolder = remplirViewHolder((TextView) convertView.findViewById(R.id.idDestinataire), viewHolder.tvMessage = (TextView) convertView.findViewById(R.id.leMessageEnvoye), viewHolder.tvDate = (TextView) convertView.findViewById(R.id.messageEnvoyeLe));
+
+                } else {
+                    convertView = inflater.inflate(R.layout.recu, parent, false);
+                    viewHolder = remplirViewHolder((TextView) convertView.findViewById(R.id.idExpediteur), viewHolder.tvMessage = (TextView) convertView.findViewById(R.id.leMessageRecu), viewHolder.tvDate = (TextView) convertView.findViewById(R.id.messageRecuLe));
+
+                }
             }
             else
             {
-                convertView = inflater.inflate(R.layout.recu, parent, false);
-                viewHolder.tvExpediteur = (TextView) convertView.findViewById(R.id.idExpediteur);
-                viewHolder.tvMessage = (TextView) convertView.findViewById(R.id.leMessageRecu);
-                viewHolder.tvDate = (TextView) convertView.findViewById(R.id.messageRecuLe);
+                if (message.getExpediteur().compareTo("self") == 0) {
+                    convertView = inflater.inflate(R.layout.photoenvoye, parent, false);
+                    viewHolder.tvExpediteur=(TextView) convertView.findViewById(R.id.idDestinataireImage);
+                    viewHolder.ivPhoto=(ImageView) convertView.findViewById(R.id.laPhotoEnvoye);
+                    viewHolder.tvDate=(TextView) convertView.findViewById(R.id.photoEnvoyeLe);
+                } else {
+                    convertView = inflater.inflate(R.layout.photorecu, parent, false);
+                    viewHolder.tvExpediteur=(TextView) convertView.findViewById(R.id.idExpediteurImage);
+                    viewHolder.ivPhoto=(ImageView) convertView.findViewById(R.id.laPhotoRecu);
+                    viewHolder.tvDate=(TextView) convertView.findViewById(R.id.photoRecuLe);
+                }
             }
             convertView.setTag(viewHolder);
         }
@@ -66,7 +87,10 @@ public class MessageAdapter extends ArrayAdapter<Messsage> {
 
 
         viewHolder.tvExpediteur.setText("Sender: "+message.getExpediteur());
-        viewHolder.tvMessage.setText("Message: \n"+message.getMessage());
+        if(!message.getIsImage())
+            viewHolder.tvMessage.setText("Message: \n"+message.getMessage());
+        else
+            viewHolder.ivPhoto.setImageBitmap(message.getBitmap());
         viewHolder.tvDate.setText("Date: "+message.getLaDate());
 
         return convertView;
