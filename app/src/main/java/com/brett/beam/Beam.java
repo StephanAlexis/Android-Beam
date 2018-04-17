@@ -90,9 +90,6 @@ public class Beam extends Activity implements CreateNdefMessageCallback,
         adapter = new MessageAdapter(this,listMessages);
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
-        listMessages.add(new Messsage("self","hello it's me", "une date"));
-        listMessages.add(new Messsage("others","hello it's you", "une date"));
-                adapter.notifyDataSetChanged();
     }
 
 
